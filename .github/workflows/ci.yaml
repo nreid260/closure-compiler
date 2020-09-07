@@ -35,6 +35,9 @@ jobs:
         with:
           bazel-version: '2.2.0'
 
+      - name: Checkout Current Commit
+        uses: actions/checkout@v2
+
       - name: ls
         run: ls -R /home/runner/work
 
@@ -81,28 +84,3 @@ jobs:
 
       - name: Test closure-compiler-npm
         run: .github/ci_support/test_closure-compiler-npm.sh
-
-  upload-snapshots:
-    name: Upload Snapshots
-    runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/master' }}
-    needs:
-      - build-and-test
-      - test-closure-compiler-npm
-    steps:
-      - name: Setup Node.js (${{ env.NODE_VERSION }})
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Grab Snapshot Bundles
-        uses: actions/download-artifact@v2
-        with:
-          name: snapshot_bundles
-          path: .
-
-      - name: Upload Snapshot Bundles
-        run: .github/ci_support/upload_sonatype_snapshot_bundles.js
-        env:
-          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
-          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
