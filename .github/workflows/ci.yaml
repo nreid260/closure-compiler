@@ -16,12 +16,7 @@ name: Compiler CI
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-  schedule:
-    # Daily at 12pm UTC
-    - cron: '0 12 * * *'
+    branches: [ actions ]
 
 jobs:
   build-and-test:
