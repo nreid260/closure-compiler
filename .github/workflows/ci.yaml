@@ -95,7 +95,8 @@ jobs:
       - name: Checkout Current closure-compiler Commit
         # https://github.com/marketplace/actions/checkout
         uses: actions/checkout@v2
-        path: closure-compiler
+        with:
+          path: closure-compiler
 
         # Clone closure-compiler-npm repo from master into ./closure-compiler-npm
       - name: Checkout Current closure-compiler-npm Commit
