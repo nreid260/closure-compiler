@@ -171,5 +171,5 @@ jobs:
       - name: Deploy Snapshot Bundles to Sonatype
         run: .github/ci_support/deploy_sonatype_snapshot_bundles.js
         env:
-          SONATYPE_USERNAME: closure-compiler
+          SONATYPE_USERNAME: nickreid
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
