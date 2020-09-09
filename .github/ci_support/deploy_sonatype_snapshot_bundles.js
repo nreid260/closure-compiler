@@ -79,12 +79,6 @@ function main() {
   });
 }
 
-const /** !Map<string, string> */ MVN_ARG_TO_JAR_SUFFIX = new Map([
-  [`-Dfile`, ``],
-  [`-Dsources`, `-sources`],
-  [`-Djavadoc`, `-javadoc`],
-]);
-
 /**
  * @param {string} settingsPath
  * @param {string} artifactId
@@ -94,21 +88,6 @@ function mavenDeploySnapshotFromBazel(settingsPath, artifactId) {
     execSync(
         `unzip bazel-bin/${artifactId}_bundle.jar -d ${tmpPath}`,
         {stdio: 'inherit'});
-
-    const baseJarPath = `${tmpPath}/${artifactId}-1.0-SNAPSHOT`;
-
-    // Example: -Dfile=/some/tmp/path/some-artifact-1.0-SNAPSHOT.jar
-    const jarArgs = [];
-    for (const [arg, suffix] of MVN_ARG_TO_JAR_SUFFIX) {
-      const fullJarPath = `${baseJarPath}${suffix}.jar`;
-      if (fs.existsSync(fullJarPath)) {
-        jarArgs.push(`${arg}=${fullJarPath}`);
-      }
-    }
-    if (jarArgs.length == 0) {
-      jarArgs.push(`-Dfile=${tmpPath}/pom.xml`);
-    }
-
     execSync(
         spaces(
             'mvn',
@@ -118,11 +97,47 @@ function mavenDeploySnapshotFromBazel(settingsPath, artifactId) {
             `  -DrepositoryId=${SNAPSHOT_REPO_ID}`,
             `  -Durl=https://oss.sonatype.org/content/repositories/snapshots/`,
             `  -DpomFile=${tmpPath}/pom.xml`,
-            ...jarArgs,
+            ...assembleJarArgs(artifactId, tmpPath),
             ),
         {stdio: 'inherit'});
   });
 }
+
+/**
+ * Create a list of JAR arguments for `mvn deploy:deploy-file`.
+ *
+ * Example: -Dfile=/some/tmp/path/some-artifact-1.0-SNAPSHOT.jar
+ *
+ * @param {string} artifactId
+ * @param {string} unpackPath
+ * @return {!Array<string>}
+ */
+function assembleJarArgs(artifactId, unpackPath) {
+  const baseJarPath = `${tmpPath}/${artifactId}-1.0-SNAPSHOT`;
+
+  const mvnArgToJarName = new Map();
+  for (const [arg, suffix] of MVN_ARG_TO_JAR_SUFFIX) {
+    const fullJarPath = `${baseJarPath}${suffix}.jar`;
+    if (fs.existsSync(fullJarPath)) {
+      mvnArgToJarName.set(arg, fullJarPath);
+    }
+  }
+
+  if (!mvnArgToJarName.get(D_FILE)) {
+    // -Dfile is required but not all bundles have a JAR, so default to the POM.
+    mvnArgToJarName.set(D_FILE, `${unpackPath}/pom.xml`);
+  }
+
+  return [...mvnArgToJarName].map(([arg, path]) => `${arg}=${path}`);
+}
+
+const /** string */ D_FILE = `-Dfile`;
+
+const /** !Map<string, string> */ MVN_ARG_TO_JAR_SUFFIX = new Map([
+  [D_FILE, ``],
+  [`-Dsources`, `-sources`],
+  [`-Djavadoc`, `-javadoc`],
+]);
 
 /**
  * @param {function(string)} callback
