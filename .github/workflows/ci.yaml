@@ -67,7 +67,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: unshaded_compiler
-          path: bazel-bin-unsymlinked/compiler_unshaded_deploy.jar
+          path: bazel-bin-unsymlink/compiler_unshaded_deploy.jar
           if-no-files-found: error
 
   test-closure-compiler-npm:
