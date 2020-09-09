@@ -76,7 +76,7 @@ jobs:
         # possible by uploading the files to GitHub controlled storage.
       - name: Share Snapshot Bundles
         # https://github.com/marketplace/actions/upload-a-build-artifact
-        if: ${{ github.event.schedule }}
+        if: ${{ github.event.push }}
         uses: actions/upload-artifact@v2
         with:
           name: snapshot_bundles
@@ -127,7 +127,7 @@ jobs:
   deploy-snapshots:
     name: Deploy Snapshot Bundles to Sonatype
     runs-on: ubuntu-latest
-    if: ${{ github.event.schedule }}
+    if: ${{ github.event.push }}
     needs:
       - build-and-test
       - test-closure-compiler-npm
