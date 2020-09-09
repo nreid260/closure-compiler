@@ -14,31 +14,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Download and test closure-compiler-npm using the compiler from this commit.
+#
+# Requirements:
+#   - PWD = closure-compiler-npm repo root
+#
+# Params:
+#   1. File name of compiler_unshaded_deploy.jar
 function main() {
-  # Run yarn install to download closure-compiler-npm, which is listed as a dev
-  # dependency.
+  compiler_jar="$1"
+
+  # Download all NPM deps to "node_modules".
   yarn install
 
-  (
-    cd node_modules/closure-compiler-npm
-    yarn install
-  )
-
-  # Copy the compiler after yarn install so that the files don't get cleaned up
+  # Copy the version of the compiler built as a pre-requisite of this script
+  # into closure-compiler-npm. The NPM repo normally builds the compiler itself,
+  # and puts the binary in these locations, so we're superceeding that here.
+  #
+  # Make sure to copy after yarn install so that the files don't get cleaned up.
+  #
   # TODO(nickreid): This should be done using scripts from inside the NPM repo
-  local compiler_jar=bazel-bin/compiler_unshaded_deploy.jar
-  local packages_dir=node_modules/closure-compiler-npm/packages
-  cp "$compiler_jar" "$packages_dir/google-closure-compiler-java/compiler.jar"
-  cp "$compiler_jar" "$packages_dir/google-closure-compiler-osx/compiler.jar"
-  cp "$compiler_jar" "$packages_dir/google-closure-compiler-linux/compiler.jar"
-  cp "$compiler_jar" "$packages_dir/google-closure-compiler-windows/compiler.jar"
+  cp "$compiler_jar" "packages/google-closure-compiler-java/compiler.jar"
+  cp "$compiler_jar" "packages/google-closure-compiler-osx/compiler.jar"
+  cp "$compiler_jar" "packages/google-closure-compiler-linux/compiler.jar"
+  cp "$compiler_jar" "packages/google-closure-compiler-windows/compiler.jar"
 
-  # Build then test each project
-  (
-    cd node_modules/closure-compiler-npm
-    yarn workspaces run build
-    yarn workspaces run test
-  )
+  # Run all the tests inside closure-compiler-npm. This will use the version
+  # of the compiler we just copied into it.
+  #
+  # The NPM repo is divided into multiple Yarn workspaces: one for each
+  # variant of the compiler, including the Graal native builds.
+  yarn workspaces run build
+  yarn workspaces run test
 }
 
 main "$@"
