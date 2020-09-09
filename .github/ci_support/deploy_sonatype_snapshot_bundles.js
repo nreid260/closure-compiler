@@ -105,6 +105,9 @@ function mavenDeploySnapshotFromBazel(settingsPath, artifactId) {
         jarArgs.push(`${arg}=${fullJarPath}`);
       }
     }
+    if (jarArgs.length == 0) {
+      jarArgs.push(`-Dfile=${tmpPath}/pom.xml`);
+    }
 
     execSync(
         spaces(
