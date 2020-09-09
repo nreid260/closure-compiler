@@ -82,40 +82,30 @@ jobs:
         with:
           node-version: ${{ env.VERSION_NODEJS }}
 
-        # Clone closure-compiler-npm repo from master into ./closure-compiler-npm
+        # Clone closure-compiler-npm repo from master into the current directory.
       - name: Checkout Current closure-compiler-npm Commit
         # https://github.com/marketplace/actions/checkout
         uses: actions/checkout@v2
         with:
           repository: google/closure-compiler-npm
           ref: master
-          path: closure-compiler-npm
 
-        # Clone closure-compiler repo from the commit under test into ./closure-compiler
+        # Clone closure-compiler repo from the commit under test into the compiler submodule
       - name: Checkout Current closure-compiler Commit
         # https://github.com/marketplace/actions/checkout
         uses: actions/checkout@v2
         with:
-          path: closure-compiler
+          path: compiler
 
-        # Clone closure-compiler-npm repo from master into ./closure-compiler-npm
-      - name: Checkout Current closure-compiler-npm Commit
-        # https://github.com/marketplace/actions/checkout
-        uses: actions/checkout@v2
-        with:
-          repository: google/closure-compiler-npm
-          ref: master
-          path: closure-compiler-npm
-
-      # Grab the compiler binary that was shared from `build-and-test` and put the file in a
-      # directory called "tmp" under the repo root.
+      # Grab the compiler binary that was shared from `build-and-test` and put the file into
+      # ./compiler/bazel-bin.
       - name: Grab Unshaded Compiler
         # https://github.com/marketplace/actions/download-a-build-artifact
         uses: actions/download-artifact@v2
         with:
           name: unshaded_compiler
-          path: tmp
+          # Put the binary where bazel would have put it.
+          path: compiler/bazel-bin
 
       - name: Test closure-compiler-npm
-        working-directory: closure-compiler-npm
-        run: ../closure-compiler/.github/ci_support/test_closure-compiler-npm.sh ../tmp/compiler_unshaded_deploy.jar
+        run: compiler/.github/ci_support/test_closure-compiler-npm.sh compiler/bazel-bin/compiler_unshaded_deploy.jar
