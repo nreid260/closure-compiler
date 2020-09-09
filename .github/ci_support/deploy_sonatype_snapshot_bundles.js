@@ -113,7 +113,7 @@ function mavenDeploySnapshotFromBazel(settingsPath, artifactId) {
  * @return {!Array<string>}
  */
 function assembleJarArgs(artifactId, unpackPath) {
-  const baseJarPath = `${tmpPath}/${artifactId}-1.0-SNAPSHOT`;
+  const baseJarPath = `${unpackPath}/${artifactId}-1.0-SNAPSHOT`;
 
   const mvnArgToJarName = new Map();
   for (const [arg, suffix] of MVN_ARG_TO_JAR_SUFFIX) {
